@@ -1,0 +1,5 @@
+/puzzle          /.netlify/functions/puzzle       200
+/validate        /.netlify/functions/validate     200
+/trap            /.netlify/functions/trap         200
+/sw-challenge    /.netlify/functions/sw-challenge 200
+/sw.js           /assets/sw.js                    200
