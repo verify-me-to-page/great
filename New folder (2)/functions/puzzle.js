@@ -1,0 +1,1 @@
+exports.handler=async()=>{return{statusCode:200,body:JSON.stringify({challenge:require('crypto').randomBytes(8).toString('hex'),difficulty:16})};};

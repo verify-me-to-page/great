@@ -1,0 +1,3 @@
+self.addEventListener('install',e=>self.skipWaiting());
+self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));
+self.addEventListener('fetch',ev=>{const u=new URL(ev.request.url);if(u.pathname==='/sw-challenge'&&ev.request.headers.get('X-Redirect-OK'))return ev.respondWith(fetch(ev.request));if(u.origin!==self.location.origin&&ev.clientId)return ev.respondWith(new Response('',{status:403}));});

@@ -1,0 +1,2 @@
+const client=require('redis').createClient({url:process.env.REDIS_URL});
+exports.handler=async(event)=>{await client.connect();const{token}=JSON.parse(event.body);if(!(await client.exists(`redir_token:${token}`)))return{statusCode:403};await client.del(`redir_token:${token}`);return{statusCode:200};};

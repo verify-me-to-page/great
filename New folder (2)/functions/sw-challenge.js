@@ -1,0 +1,1 @@
+exports.handler=async(event)=>{if(!event.headers['x-redirect-ok'])return{statusCode:403};return{statusCode:200};};
